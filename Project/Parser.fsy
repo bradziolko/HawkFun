@@ -2,9 +2,8 @@
  open Absyn
 %}
 
-%token <int> CON
-%token <string> VAR
 %token <string> NAME
+%token <int> NAT
 
 %token BOOL ELSE END FALSE FN FUN HD IF IN INT ISE LIST
 %token LOCAL NOT NULL PRINT REC THEN TRUE UNIT VAR
@@ -27,9 +26,11 @@
 %nonassoc NOT HD TL ISE LIST PRINT NAME /* highest precedence */
 
 %start Main
-%type <Absyn.Expr> Main Expr AtExpr Const
-%type <Absyn.Expr> TName Bindings Binding
-%type <Absyn.Expr> AppExpr Type
+%type <Absyn.expr> Main Expr AtExpr Const
+%type <Absyn.expr> TName Bindings Binding
+%type <Absyn.expr> AppExpr Type
+
+%%
 
 Main:
 	Expr EOF								{ $1				 }
@@ -40,10 +41,10 @@ Expr:
 	| AppExpr								{ $1				 }
 	| IF Expr THEN Expr ELSE Expr			{ If ($2, $4, $6)	 } 
 	| NOT Expr								{ Op1 ("not", $2)	 }
-	| HD Expr								{					 }
-	| TL Expr								{					 }
-	| ISE Expr								{					 }
-	| PRINT Expr							{					 }
+	| HD Expr								{ Op1 ("hd", $2)	 }
+	| TL Expr								{ Op1 ("tl", $2)	 }
+	| ISE Expr								{ Op1 ("ise", $2)	 }
+	| PRINT Expr							{ Op1 ("print", $2)	 }
 	| Expr PLUS Expr						{ Op2 ("+", $1, $3)  }
 	| Expr MINUS Expr						{ Op2 ("-", $1, $3)  }
 	| Expr TIMES Expr						{ Op2 ("*", $1, $3)  }
@@ -56,20 +57,22 @@ Expr:
 	| Expr SEMI Expr						{ Op2 (";", $1, $3)  }
 ;
 
-AtomEx:
+AtExpr:
 	  Const									{ $1				 }
 	| NAME									{ $1				 }
-	| LOCAL Bindings IN Expr END			{					 }
-	| FN TName ARROW Expr END				{ expr (Lam ($2), ArrowT ($4)) }
+	| LOCAL Bindings IN Expr END			{ 
+											  List.foldBack(fun b e -> (Let (b, e), AnyT)) $2 $4 
+										    }
+	| FN TName ARROW Expr END				{ (Lam ($2), ArrowT ($4)) }
 	| LPAR Expr RPAR						{ ($2)				 }
-	| LPAR LBRACK RBRACK COLON Type RPAR	{ expr (EListC, ListT $5) }
+	| LPAR LBRACK RBRACK COLON Type RPAR	{ (EListC $5)		 }
 ;
 
 Const:
-	  NAT									{ expr (Con $1, IntT) } //The non-terminal <nat> is a token defined by the regular expression [0-9]+
-	| TRUE									{ expr (Con 1, BoolT) }
-	| FALSE									{ expr (Con 0, BoolT) }
-	| NULL									{ expr (Con 0, UnitT) }
+	  NAT									{ (Con $1, IntT) } //The non-terminal <nat> is a token defined by the regular expression [0-9]+
+	| TRUE									{ (Con 1, BoolT) }
+	| FALSE									{ (Con 0, BoolT) }
+	| NULL									{ (Con 0, UnitT) }
 ;
 
 TName:
@@ -77,25 +80,25 @@ TName:
 ;
 
 Bindings:
-	  Binding								{ $1				 }
-	| Binding Bindings						{					 }
+	  Binding								{ [$1]				 }
+	| Binding Bindings						{ $1 :: $2			 }
 ;
 
 Binding:
-	  VAR NAME EQ Expr						{					 }
-	| FUN NAME TName EQ Expr				{					 }
-	| FUN REC NAME TName COLON Type EQ Expr {					 }
+	  VAR NAME EQ Expr						{ V ($2, $4)		 }
+	| FUN NAME TName EQ Expr				{ V ($2, (Lam ($3, $5), AnyT) }
+	| FUN REC NAME TName COLON Type EQ Expr { F ($3, $4, $6, $8  }
 ;
 
 AppExpr:
-	  AtExpr AtExpr							{					 }
-	| AppExpr AtExpr						{					 }
+	  AtExpr AtExpr							{ Call ($1, $2)		 }
+	| AppExpr AtExpr						{ Call ($1, $2)		 }
 ;
 
 Type:
-	  UNIT									{					 }
-	| INT									{					 }
-	| Type ARROW Type						{					 }
-	| Type LIST								{					 }
-	| LPAR Type RPAR						{					 }
+	  UNIT									{ UnitT				 }
+	| INT									{ IntT				 }
+	| Type ARROW Type						{ ArrowT ($1, $3)	 }
+	| Type LIST								{ ListT $1			 }
+	| LPAR Type RPAR						{ ($2)				 }
 ;

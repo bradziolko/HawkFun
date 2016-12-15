@@ -32,3 +32,4 @@ and listToString l t =
   | v :: vs -> (toString v t) + "; " + (listToString vs t)
 
 
+let run e = eval e []

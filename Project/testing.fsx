@@ -15,7 +15,7 @@
    #load "Lexer.fs" 
    #load "Parse.fs" 
    #load "Env.fs" 
-   #load "TypeCheck.fs"
+   //#load "TypeCheck.fs"
    #load "Inter.fs"
 
    (*#r "/Users/tinelli/Desktop/Project/bin/FsLexYacc.Runtime.dll"
