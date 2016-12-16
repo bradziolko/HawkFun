@@ -31,10 +31,12 @@
 open Absyn
 
 let fromString = Parse.fromString
-let check = TypeCheck.check
+//let check = TypeCheck.check
 let eval = Inter.eval
 let run = Inter.run
-let crun e = run (check e)
+//let crun e = run (check e)
+
+let st = fromString "2"
 
 let ex = fromString "
   local var x = false in 2 * x end

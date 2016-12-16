@@ -30,14 +30,13 @@ let keyword s =
 	| "unit"	-> UNIT
 	| "var"		-> VAR
 	| _			-> NAME s
-;
 }
 
 rule Token = parse
-	| [' ' '\t' '\r']	{ Token lexbuf }
+	| [' ''\t''\r']		{ Token lexbuf }
 	| '\n'				{ lexbuf.EndPos <- lexbuf.EndPos.NextLine; Token lexbuf }
-	| ['a'-'z' 'A'-'Z' '_']['a'-'z' 'A'-'Z' '_' '0'-'9']* { keyword (lexemeAsString lexbuf) }
 	| ['0'-'9']+		{ NAT (System.Int32.Parse (lexemeAsString lexbuf)) }
+	| ['a'-'z''A'-'Z''_']['a'-'z''A'-'Z''_''0'-'9']* { keyword (lexemeAsString lexbuf) }
 	| '+'				{ PLUS }
 	| '-'				{ MINUS }
 	| '*'				{ TIMES }
