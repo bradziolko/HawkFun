@@ -36,7 +36,23 @@ let eval = Inter.eval
 let run = Inter.run
 //let crun e = run (check e)
 
-let st = fromString "2"
+let ex = fromString "15"
+run ex
+
+let ex = fromString "true"
+run ex
+
+let ex = fromString "null"
+run ex
+
+let ex = fromString "([]:bool list)"
+run ex
+
+let ex = fromString "x"
+run ex
+
+let ex = fromString "fn (x:int) => x end"
+run ex
 
 let ex = fromString "
   local var x = false in 2 * x end

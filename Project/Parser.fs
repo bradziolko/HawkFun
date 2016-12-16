@@ -749,7 +749,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 90 "Parser.fsy"
-                                                    V (_2, (Lam (_3, _5), AnyT) 
+                                                    F (_2, _3, AnyT, _5) 
                    )
 # 90 "Parser.fsy"
                  : Absyn.binding));

@@ -87,7 +87,7 @@ Bindings:
 
 Binding:
 	  VAR NAME EQ Expr						{ V ($2, $4)		 }
-	| FUN NAME TName EQ Expr				{ V ($2, (Lam ($3, $5), AnyT) }
+	| FUN NAME TName EQ Expr				{ F ($2, $3, AnyT, $5) }
 	| FUN REC NAME TName COLON Type EQ Expr { F ($3, $4, $6, $8)  }
 ;
 
